@@ -1,5 +1,5 @@
 from src import app, mysql
-import json
+from flask import jsonify
 
 grades = {
         'pg': 'perfect_grade', 
@@ -37,7 +37,7 @@ def get_grade(grade):
             'description': kit[5]
         } for kit in data]
 
-    return json.dumps(result) 
+    return jsonify(result) 
 
 @app.route('/api/1.0/<string:grade>/<int:kit_id>', methods=['GET'])
 def get_kit(grade, kit_id):
@@ -48,7 +48,7 @@ def get_kit(grade, kit_id):
     cursor.execute(query)
     kit = cursor.fetchone()
 
-    return json.dumps({
+    return jsonify({
         'kit_id': kit[1],
         'name': kit[2],
         'series': kit[3],
