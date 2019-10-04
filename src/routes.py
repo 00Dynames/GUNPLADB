@@ -8,12 +8,6 @@ grades = {
         'hguc': 'hguc'
         }
 
-# TODO: remove
-@app.route('/')
-@app.route('/index')
-def index():
-    return "Hello, World!"
-
 @app.route('/api/1.0/<string:grade>', methods=['GET'])
 def get_grade(grade):
     # TODO: validate the grade
