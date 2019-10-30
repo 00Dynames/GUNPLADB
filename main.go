@@ -26,6 +26,12 @@ type gunpla_kit struct {
 func gunpla_get(w http.ResponseWriter, r *http.Request) {
 	jsonData := []byte{}
 	grade := mux.Vars(r)["grade"]
+	grade_id := ""
+
+	//TODO: do something if the grade id is out of range
+	if mux.Vars(r)["grade_id"] != "" {
+		grade_id = mux.Vars(r)["grade_id"]
+	}
 
 	//TODO: parameterise mysql creds
 	db, err := sql.Open("mysql", "dbunadi:bcWoJwgiO81AaNDMj1oE@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb")
@@ -36,7 +42,12 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 
-	results, err := db.Query(fmt.Sprintf("select * from gunpla where grade='%s'", grade))
+	var results *sql.Rows
+	if grade_id != "" {
+		results, err = db.Query(fmt.Sprintf("select * from gunpla where grade='%s' and grade_id='%s'", grade, grade_id))
+	} else {
+		results, err = db.Query(fmt.Sprintf("select * from gunpla where grade='%s'", grade))
+	}
 
 	if err != nil {
 		log.Printf("query error")
@@ -58,15 +69,32 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		mKit, err := json.Marshal(kit)
 		jsonData = append(jsonData, mKit...)
-		log.Printf(kit.Name)
+		//log.Printf(kit.Name)
 	}
 	w.Write(jsonData)
 }
 
+/*func gunpla_get_grade_id(w http.ResponseWriter, r *http.Request) {
+
+	grade := mux.Vars(r)["grade"]
+	grade_id := mux.Vars(r)["grade_id"]
+	jsonData := []byte{}
+
+	db, err := sql.Open("mysql", "dbunadi:bcWoJwgiO81AaNDMj1oE@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+}*/
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/1.0/gunpla/{grade}", gunpla_get).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/{grade}/{grade_id}", gunpla_get).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
