@@ -47,11 +47,21 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 
 	var results *sql.Rows
 	if grade_id != "" {
-		results, err = db.Query(fmt.Sprintf("select * from gunpla where grade='%s' and grade_id='%s'", grade, grade_id))
+		results, err = db.Query(
+			fmt.Sprintf(
+				"select * from gunpla where grade='%s' and grade_id='%s'",
+				grade,
+				grade_id,
+			),
+		)
 	} else {
-		results, err = db.Query(fmt.Sprintf("select * from gunpla where grade='%s'", grade))
+		results, err = db.Query(
+			fmt.Sprintf(
+				"select * from gunpla where grade='%s'",
+				grade,
+			),
+		)
 	}
-
 	logError(err)
 
 	for results.Next() {
