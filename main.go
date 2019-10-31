@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 type gunpla_kit struct {
@@ -22,6 +23,11 @@ type gunpla_kit struct {
 }
 
 //TODO: wrap err checking conditions into a function
+func logError(e error) {
+	if e != nil {
+		log.Fatal(e)
+	}
+}
 
 func gunpla_get(w http.ResponseWriter, r *http.Request) {
 	jsonData := []gunpla_kit{}
@@ -35,10 +41,7 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: parameterise mysql creds
 	db, err := sql.Open("mysql", "dbunadi:bcWoJwgiO81AaNDMj1oE@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb")
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	logError(err)
 
 	defer db.Close()
 
@@ -49,10 +52,8 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 		results, err = db.Query(fmt.Sprintf("select * from gunpla where grade='%s'", grade))
 	}
 
-	if err != nil {
-		log.Printf("query error")
-		log.Fatal(err)
-	}
+	logError(err)
+
 	for results.Next() {
 		var kit gunpla_kit
 		err := results.Scan(
@@ -66,14 +67,13 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 			&kit.Description,
 		)
 
-		if err != nil {
-			log.Fatal(err)
-		}
+		logError(err)
 
 		jsonData = append(jsonData, kit)
 	}
 
 	message, err := json.Marshal(jsonData)
+	logError(err)
 	w.Write(message)
 }
 
