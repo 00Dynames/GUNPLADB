@@ -24,7 +24,7 @@ type gunpla_kit struct {
 //TODO: wrap err checking conditions into a function
 
 func gunpla_get(w http.ResponseWriter, r *http.Request) {
-	jsonData := []byte{}
+	jsonData := []gunpla_kit{}
 	grade := mux.Vars(r)["grade"]
 	grade_id := ""
 
@@ -70,11 +70,11 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		mKit, err := json.Marshal(kit)
-		jsonData = append(jsonData, mKit...)
-		//log.Printf(kit.Name)
+		jsonData = append(jsonData, kit)
 	}
-	w.Write(jsonData)
+
+	message, err := json.Marshal(jsonData)
+	w.Write(message)
 }
 
 /*func gunpla_get_grade_id(w http.ResponseWriter, r *http.Request) {
