@@ -77,21 +77,6 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 	w.Write(message)
 }
 
-/*func gunpla_get_grade_id(w http.ResponseWriter, r *http.Request) {
-
-	grade := mux.Vars(r)["grade"]
-	grade_id := mux.Vars(r)["grade_id"]
-	jsonData := []byte{}
-
-	db, err := sql.Open("mysql", "dbunadi:bcWoJwgiO81AaNDMj1oE@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer db.Close()
-}*/
-
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/1.0/gunpla/{grade}", gunpla_get).Methods("GET")
