@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -22,51 +23,28 @@ type gunpla_kit struct {
 	Description string `json:"description"`
 }
 
-//TODO: wrap err checking conditions into a function
+var dbConn *sql.DB
+
 func logError(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
 }
 
-func gunpla_get(w http.ResponseWriter, r *http.Request) {
-	jsonData := []gunpla_kit{}
-	grade := mux.Vars(r)["grade"]
-	grade_id := ""
+func dbQuery(conn *sql.DB, query string) ([]gunpla_kit, error) {
 
-	//TODO: do something if the grade id is out of range
-	if mux.Vars(r)["grade_id"] != "" {
-		grade_id = mux.Vars(r)["grade_id"]
+	result := []gunpla_kit{}
+
+	fmt.Println(query)
+
+	qResult, err := conn.Query(query)
+	if err != nil {
+		return nil, err
 	}
 
-	//TODO: parameterise mysql creds
-	db, err := sql.Open("mysql", "dbunadi:bcWoJwgiO81AaNDMj1oE@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb")
-	logError(err)
-
-	defer db.Close()
-
-	var results *sql.Rows
-	if grade_id != "" {
-		results, err = db.Query(
-			fmt.Sprintf(
-				"select * from gunpla where grade='%s' and grade_id='%s'",
-				grade,
-				grade_id,
-			),
-		)
-	} else {
-		results, err = db.Query(
-			fmt.Sprintf(
-				"select * from gunpla where grade='%s'",
-				grade,
-			),
-		)
-	}
-	logError(err)
-
-	for results.Next() {
+	for qResult.Next() {
 		var kit gunpla_kit
-		err := results.Scan(
+		err := qResult.Scan(
 			&kit.Id,
 			&kit.Grade_id,
 			&kit.Grade,
@@ -77,19 +55,89 @@ func gunpla_get(w http.ResponseWriter, r *http.Request) {
 			&kit.Description,
 		)
 
-		logError(err)
+		result = append(result, kit)
 
-		jsonData = append(jsonData, kit)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
+func gunpla_get(w http.ResponseWriter, r *http.Request) {
+	result := []gunpla_kit{}
+	var err error
+	grade := mux.Vars(r)["grade"]
+	grade_id := ""
+
+	//TODO: do something if the grade id is out of range
+	if mux.Vars(r)["grade_id"] != "" {
+		grade_id = mux.Vars(r)["grade_id"]
 	}
 
-	message, err := json.Marshal(jsonData)
+	if grade_id != "" {
+		result, err = dbQuery(
+			dbConn,
+			fmt.Sprintf(
+				"select * from gunpla where grade='%s' and grade_id='%s'",
+				grade,
+				grade_id,
+			),
+		)
+	} else {
+		result, err = dbQuery(
+			dbConn,
+			fmt.Sprintf(
+				"select * from gunpla where grade='%s'",
+				grade,
+			),
+		)
+	}
+	logError(err)
+
+	message, err := json.Marshal(result)
+	logError(err)
+	w.Write(message)
+}
+
+func series_get(w http.ResponseWriter, r *http.Request) {
+
+	result, err := dbQuery(
+		dbConn,
+		fmt.Sprintf("select * from gunpla where series = %s", mux.Vars(r)["series"]),
+	)
+	logError(err)
+
+	message, err := json.Marshal(result)
 	logError(err)
 	w.Write(message)
 }
 
 func main() {
+
+	fmt.Printf(
+		"%s:%s@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb\n",
+		os.Getenv("MYSQL_USER"),
+		os.Getenv("MYSQL_PASSWORD"),
+	)
+
+	var err error
+	dbConn, err = sql.Open(
+		"mysql",
+		fmt.Sprintf(
+			"%s:%s@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb",
+			os.Getenv("MYSQL_USER"),
+			os.Getenv("MYSQL_PASSWORD"),
+		),
+	)
+	fmt.Println(dbConn)
+	logError(err)
+
+	defer dbConn.Close()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/api/1.0/gunpla/{grade}", gunpla_get).Methods("GET")
 	r.HandleFunc("/api/1.0/gunpla/{grade}/{grade_id}", gunpla_get).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/{series}", series_get).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
