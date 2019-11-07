@@ -115,12 +115,6 @@ func series_get(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	fmt.Printf(
-		"%s:%s@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb\n",
-		os.Getenv("MYSQL_USER"),
-		os.Getenv("MYSQL_PASSWORD"),
-	)
-
 	var err error
 	dbConn, err = sql.Open(
 		"mysql",
@@ -130,7 +124,6 @@ func main() {
 			os.Getenv("MYSQL_PASSWORD"),
 		),
 	)
-	fmt.Println(dbConn)
 	logError(err)
 
 	defer dbConn.Close()
