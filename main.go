@@ -23,6 +23,11 @@ type gunpla_kit struct {
 	Description string `json:"description"`
 }
 
+type grade struct {
+	Id    int
+	Grade string
+}
+
 var dbConn *sql.DB
 
 func logError(e error) {
@@ -65,6 +70,19 @@ func dbQuery(conn *sql.DB, query string) ([]gunpla_kit, error) {
 }
 
 func getGrades(w http.ResponseWriter, r *http.Request) {
+
+	result := []grade{}
+	qResult, _ := dbConn.Query("select * from grades")
+	fmt.Println(result)
+
+	for qResult.Next() {
+		g := grade{}
+		qResult.Scan(&g.Id, &g.Grade)
+		result = append(result, g)
+	}
+
+	message, _ := json.Marshal(result)
+	w.Write(message)
 
 }
 
