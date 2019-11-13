@@ -67,21 +67,21 @@ func dbQuery(conn *sql.DB, query string) ([]gunpla_kit, error) {
 func gunpla_get(w http.ResponseWriter, r *http.Request) {
 	result := []gunpla_kit{}
 	var err error
-	grade := mux.Vars(r)["grade"]
-	grade_id := ""
+	grade := mux.Vars(r)["grade_id"]
+	kit := ""
 
 	//TODO: do something if the grade id is out of range
-	if mux.Vars(r)["grade_id"] != "" {
-		grade_id = mux.Vars(r)["grade_id"]
+	if mux.Vars(r)["kit_id"] != "" {
+		kit = mux.Vars(r)["kit_id"]
 	}
 
-	if grade_id != "" {
+	if kit != "" {
 		result, err = dbQuery(
 			dbConn,
 			fmt.Sprintf(
 				"select * from gunpla where grade='%s' and grade_id='%s'",
 				grade,
-				grade_id,
+				kit,
 			),
 		)
 	} else {
@@ -119,9 +119,10 @@ func main() {
 	dbConn, err = sql.Open(
 		"mysql",
 		fmt.Sprintf(
-			"%s:%s@tcp(gunpladb-1.clqhihsn26ab.ap-southeast-2.rds.amazonaws.com)/gunpladb",
+			"%s:%s@tcp(%s)/gunpladb",
 			os.Getenv("MYSQL_USER"),
 			os.Getenv("MYSQL_PASSWORD"),
+			os.Getenv("MYSQL_HOST"),
 		),
 	)
 	logError(err)
@@ -129,8 +130,8 @@ func main() {
 	defer dbConn.Close()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api/1.0/gunpla/{grade}", gunpla_get).Methods("GET")
-	r.HandleFunc("/api/1.0/gunpla/{grade}/{grade_id}", gunpla_get).Methods("GET")
-	r.HandleFunc("/api/1.0/gunpla/{series}", series_get).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/grades/{grade_id}", gunpla_get).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/grades/{grade_id}/{kit_id}", gunpla_get).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/series/{series_id}", series_get).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
