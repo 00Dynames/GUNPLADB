@@ -64,6 +64,10 @@ func dbQuery(conn *sql.DB, query string) ([]gunpla_kit, error) {
 	return result, nil
 }
 
+func getGrades(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func gunpla_get(w http.ResponseWriter, r *http.Request) {
 	result := []gunpla_kit{}
 	var err error
@@ -130,6 +134,7 @@ func main() {
 	defer dbConn.Close()
 
 	r := mux.NewRouter()
+	r.HandleFunc("/api/1.0/gunpla/grades", getGrades).Methods("GET")
 	r.HandleFunc("/api/1.0/gunpla/grades/{grade_id}", gunpla_get).Methods("GET")
 	r.HandleFunc("/api/1.0/gunpla/grades/{grade_id}/{kit_id}", gunpla_get).Methods("GET")
 	r.HandleFunc("/api/1.0/gunpla/series/{series_id}", series_get).Methods("GET")
