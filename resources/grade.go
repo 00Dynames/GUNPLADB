@@ -42,7 +42,7 @@ func (db *DB) GetGradeKits(grade *string, kit *int) ([]Kit, error) {
 	if kit != nil {
 		tmp, err = db.Query(
 			fmt.Sprintf(
-				"select * from gunpla where grade='%s' and grade_id='%s'",
+				"select * from gunpla where grade='%s' and grade_id='%d'",
 				*grade,
 				*kit,
 			),
