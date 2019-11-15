@@ -43,7 +43,7 @@ func main() {
 		grade := mux.Vars(r)["grade_id"]
 		kit, _ := strconv.Atoi(mux.Vars(r)["kit_id"])
 		result, _ := db.GetGradeKits(&grade, &kit)
-		message, _ := json.Marshal(result)
+		message, _ := json.Marshal(result[0])
 		w.Write(message)
 	}).Methods("GET")
 	//r.HandleFunc("/api/1.0/gunpla/series/{series_id}", series_get).Methods("GET")

@@ -7,8 +7,9 @@ import (
 )
 
 type grade struct {
-	Id    int
-	Grade string
+	id   int
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 
 func (db *DB) GetGrades() ([]grade, error) {
@@ -24,7 +25,11 @@ func (db *DB) GetGrades() ([]grade, error) {
 
 	for qResult.Next() {
 		g := grade{}
-		qResult.Scan(&g.Id, &g.Grade)
+		qResult.Scan(&g.id, &g.Name)
+		//TODO: replace localhost with a parameterised base url
+		//TODO: replace name with id in url after enabling the endpoint
+		//			to take name or id
+		g.Url = fmt.Sprintf("%s/api/1.0/gunpla/grades/%v", "localhost:8080", g.Name)
 		result = append(result, g)
 	}
 
