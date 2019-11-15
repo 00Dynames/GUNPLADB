@@ -35,6 +35,7 @@ func (db *DB) GetGradeKits(grade *string, kit *int) ([]Kit, error) {
 	result := []Kit{}
 	var err error
 
+	//fmt.Printf("%s, %d", *grade, *kit)
 	//TODO: do something if the grade id is out of range
 
 	var tmp *sql.Rows
@@ -42,15 +43,15 @@ func (db *DB) GetGradeKits(grade *string, kit *int) ([]Kit, error) {
 		tmp, err = db.Query(
 			fmt.Sprintf(
 				"select * from gunpla where grade='%s' and grade_id='%s'",
-				grade,
-				kit,
+				*grade,
+				*kit,
 			),
 		)
 	} else {
 		tmp, err = db.Query(
 			fmt.Sprintf(
 				"select * from gunpla where grade='%s'",
-				grade,
+				*grade,
 			),
 		)
 	}
