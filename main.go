@@ -12,8 +12,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var dbConn *sql.DB
-
 type Env struct {
 	DB resources.DB
 }
