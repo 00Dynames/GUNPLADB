@@ -46,6 +46,5 @@ func main() {
 		message, _ := json.Marshal(result[0])
 		w.Write(message)
 	}).Methods("GET")
-	//r.HandleFunc("/api/1.0/gunpla/series/{series_id}", series_get).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
