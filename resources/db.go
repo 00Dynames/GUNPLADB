@@ -7,11 +7,13 @@ import (
 )
 
 type ResourceData interface {
-	GetGrades() ([]grade, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Close() error
 }
 
 type DB struct {
-	*sql.DB
+	//*sql.DB
+	ResourceData
 }
 
 func OpenConnection() (*DB, error) {
