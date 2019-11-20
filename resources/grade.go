@@ -3,7 +3,6 @@ package resources
 import (
 	"database/sql"
 	"fmt"
-	"log"
 )
 
 type Grade struct {
@@ -15,10 +14,6 @@ type Grade struct {
 func (db *DB) GetGrades() ([]Grade, error) {
 	result := []Grade{}
 	qResult, err := db.Query("select * from grades")
-	if err != nil {
-		log.Panic(err)
-	}
-
 	if err != nil {
 		return nil, err
 	}
