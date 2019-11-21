@@ -54,12 +54,58 @@ func TestGetGradeKits(t *testing.T) {
 			"release",
 			"description",
 		},
-	).AddRow(1, 1, "RG", "RX-78-2", "Mobile Suit Gundam", "1000", "", "Test")
+	).AddRow(1, 1, "RG", "RX-78-2", "Mobile Suit Gundam", "1000", "", "Test").AddRow(2, 2, "RG", "Zeta Gundam", "Mobile Suit Z Gundam", "1000", "", "Test")
 	m.ExpectQuery("select \\* from gunpla where grade='RG'").WillReturnRows(rows)
 
-	expected := []resources.Kit{{1, 1, "RG", "RX-78-2", "Mobile Suit Gundam", 1000, "", "Test"}}
+	expected := []resources.Kit{
+		{1, 1, "RG", "RX-78-2", "Mobile Suit Gundam", 1000, "", "Test"},
+		{2, 2, "RG", "Zeta Gundam", "Mobile Suit Z Gundam", 1000, "", "Test"},
+	}
+
 	grade := "RG"
 	result, err := db.GetGradeKits(&grade, nil)
 	assert.Equal(t, expected, result)
 	assert.Nil(t, err)
+}
+
+func TestGetGradeKitsKit(t *testing.T) {
+
+	mockDB, m, _ := sqlmock.New()
+	db := resources.DB{mockDB}
+
+	rows := sqlmock.NewRows(
+		[]string{
+			"id",
+			"grade_id",
+			"grade",
+			"name",
+			"series",
+			"price",
+			"release",
+			"description",
+		},
+	).AddRow(2, 2, "RG", "Zeta Gundam", "Mobile Suit Z Gundam", "1000", "", "Test")
+
+	m.ExpectQuery("select \\* from gunpla where grade='RG' and grade_id='2'").WillReturnRows(rows)
+
+	expected := []resources.Kit{{2, 2, "RG", "Zeta Gundam", "Mobile Suit Z Gundam", 1000, "", "Test"}}
+
+	grade := "RG"
+	grade_id := 2
+	result, err := db.GetGradeKits(&grade, &grade_id)
+	assert.Equal(t, expected, result)
+	assert.Nil(t, err)
+}
+
+func TestGetGradeKitsQueryFail(t *testing.T) {
+
+	mockDB, m, _ := sqlmock.New()
+	db := resources.DB{mockDB}
+
+	// TODO: it *might* matter what the error is, maybe?
+	m.ExpectQuery("select \\* from gunpla where grade='RG'").WillReturnError(fmt.Errorf("some error"))
+
+	grade := "RG"
+	_, err := db.GetGradeKits(&grade, nil)
+	assert.Equal(t, fmt.Errorf("some error"), err)
 }
