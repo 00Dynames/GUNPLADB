@@ -3,29 +3,24 @@ package resources
 import (
 	"database/sql"
 	"fmt"
-	"log"
 )
 
-type grade struct {
-	id   int
+type Grade struct {
+	Id   int
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
 
-func (db *DB) GetGrades() ([]grade, error) {
-	result := []grade{}
+func (db *DB) GetGrades() ([]Grade, error) {
+	result := []Grade{}
 	qResult, err := db.Query("select * from grades")
-	if err != nil {
-		log.Panic(err)
-	}
-
 	if err != nil {
 		return nil, err
 	}
 
 	for qResult.Next() {
-		g := grade{}
-		qResult.Scan(&g.id, &g.Name)
+		g := Grade{}
+		qResult.Scan(&g.Id, &g.Name)
 		//TODO: replace localhost with a parameterised base url
 		//TODO: replace name with id in url after enabling the endpoint
 		//			to take name or id

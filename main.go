@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -11,8 +10,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
-
-var dbConn *sql.DB
 
 type Env struct {
 	DB resources.DB
