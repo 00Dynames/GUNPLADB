@@ -27,15 +27,34 @@ func (db *DB) GetSeries() ([]Series, error) {
 	return result, nil
 }
 
-/*func series_get(w http.ResponseWriter, r *http.Request) {
+func (db *DB) GetSeriesKits(series *int) ([]Kit, error) {
 
-	result, err := dbQuery(
-		dbConn,
-		fmt.Sprintf("select * from gunpla where series = %s", mux.Vars(r)["series"]),
-	)
-	logError(err)
+	result := []Kit{}
 
-	message, err := json.Marshal(result)
-	logError(err)
-	w.Write(message)
-}*/
+	qResult, err := db.Query(fmt.Sprintf("select * from gunpla where series =(select series from series where id = %d)", *series))
+	if err != nil {
+		return nil, err
+	}
+
+	for qResult.Next() {
+		k := Kit{}
+		err := qResult.Scan(
+			&k.Id,
+			&k.Grade_id,
+			&k.Grade,
+			&k.Name,
+			&k.Series,
+			&k.Price,
+			&k.Release,
+			&k.Description,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, k)
+	}
+
+	return result, nil
+}

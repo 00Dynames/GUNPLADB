@@ -49,6 +49,15 @@ func main() {
 		message, _ := json.Marshal(series)
 		w.Write(message)
 	}).Methods("GET")
+	r.HandleFunc("/api/1.0/gunpla/series/{series_id}", func(w http.ResponseWriter, r *http.Request) {
+		series, _ := strconv.Atoi(mux.Vars(r)["series_id"])
+		kits, err := db.GetSeriesKits(&series)
+		if err != nil {
+			log.Panic(err)
+		}
+		message, _ := json.Marshal(kits)
+		w.Write(message)
+	}).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
